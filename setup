@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+echo Server Details :
+read -r -p "USERNAME: " user
+read -r -p "SERVER ip: " ip
+read -r -p "Identity file: " id
+display="export DISPLAY=':0.0';"
+ssh_cmd="ssh -o BatchMode=yes -o StrictHostKeyChecking=no"
+sleep_msg="OCI takes few seconds to restart sshd. Plz wait !" #77s+
+
+if [ -z "$id" ]; then
+  id="$HOME/.ssh/webserver"
+fi
+
+run(){
+  display="${display} $1"
+  if [ -z "$2" ]; then
+    $ssh_cmd "$user@$ip" -i "$id" "sudo bash -c '$display'"
+  elif [ "$2" -eq "1" ]; then
+    $ssh_cmd "root@$ip" -i "$id" "$display" #1
+  else
+    $ssh_cmd "creator54@$ip" -i "$id" "$display" #2 ,creator54 is set in configuration.nix so you need to change there to change here
+  fi
+}
+
+#convert to nixos with root user
+run "curl -s https://raw.githubusercontent.com/elitak/nixos-infect/master/nixos-infect | NIX_CHANNEL=nixos-21.11 bash -x"
+
+#remove old hosts
+cp "$HOME/.ssh/known_hosts" "$HOME/.ssh/known_hosts.old" #keep backup
+grep -v "$ip" "$HOME/.ssh/known_hosts.old" > "$HOME/.ssh/known_hosts";
+
+#login and configure
+echo "$sleep_msg.Sleeping for 85 seconds"; sleep 83;
+run "sleep 2; curl -s https://raw.githubusercontent.com/creator54/nixos-cfg/server/server.nix > /etc/nixos/configuration.nix; nixos-rebuild switch" "1"
+
+#now user is normal user
+echo "$sleep_msg.Sleeping for 20 seconds"; sleep 18;
+run "sleep 2; nix-shell -p git --run 'git clone https://github.com/creator54/nixos-cfg -b server ~/.config/nixpkgs';home-manager switch" "2"
