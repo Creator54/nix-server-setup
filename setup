@@ -32,7 +32,7 @@ grep -v "$ip" "$HOME/.ssh/known_hosts.old" > "$HOME/.ssh/known_hosts";
 
 #login and configure
 echo "$sleep_msg.Sleeping for 85 seconds"; sleep 83;
-run "sleep 2; curl -s https://raw.githubusercontent.com/creator54/nixos-cfg/server/server.nix > /etc/nixos/configuration.nix; nixos-rebuild switch" "1"
+run "sleep 2; curl -s https://raw.githubusercontent.com/creator54/nixos-cfg/s1/server.nix > /etc/nixos/configuration.nix; nixos-rebuild switch" "1"
 
 #now user is normal user
 echo "$sleep_msg.Sleeping for 20 seconds"; sleep 18;
